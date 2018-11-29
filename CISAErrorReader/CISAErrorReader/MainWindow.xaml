@@ -1,0 +1,15 @@
+﻿<Window x:Class="CISAErrorReader.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CISAErrorReader"
+        mc:Ignorable="d"
+        Title="CISA Error Reader" Height="350" Width="1024" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Label x:Name="errorFileLabel" Content="Error File:" HorizontalAlignment="Left" Margin="10,22,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="errorFile" Height="23" Margin="75,25,120,0" TextWrapping="NoWrap" TextAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
+        <Button x:Name="browse_file" Content="Browse" HorizontalAlignment="Right" Margin="0,25,10,0" VerticalAlignment="Top" Width="101" Click="browse_file_Click" />
+
+    </Grid>
+</Window>
