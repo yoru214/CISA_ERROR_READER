@@ -48,6 +48,14 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="UpdateControls, Version=2.3.0.0, Culture=neutral, PublicKeyToken=19e83a8289e31a8f, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpdateControls.2.3.3\lib\net45\UpdateControls.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="UpdateControls.XAML, Version=2.3.0.0, Culture=neutral, PublicKeyToken=19e83a8289e31a8f, processorArchitecture=MSIL">
+      <HintPath>..\packages\UpdateControls.2.3.3\lib\net45\UpdateControls.XAML.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -73,10 +81,14 @@
   <ItemGroup>
     <Compile Include="Models\Error\Contract.cs" />
     <Compile Include="Models\Error\ContractDetails.cs" />
+    <Compile Include="Models\Error\ContractRows.cs" />
     <Compile Include="Models\Error\Prevalidation.cs" />
     <Compile Include="Models\Error\PrevalidationDetails.cs" />
+    <Compile Include="Models\Error\PrevalidationRows.cs" />
     <Compile Include="Models\Error\Subject.cs" />
     <Compile Include="Models\Error\SubjectDetails.cs" />
+    <Compile Include="Models\Error\SubjectRows.cs" />
+    <Compile Include="Models\LocalData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -94,6 +106,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

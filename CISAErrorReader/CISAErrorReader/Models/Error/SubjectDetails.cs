@@ -14,5 +14,6 @@ namespace CISAErrorReader.Models.Error
         public int ErrorType { get; set; }
         public int ErrorCode { get; set; }
         public int RowNumber { get; set; }
+        public String ErrorData { get; set; }
     }
 }

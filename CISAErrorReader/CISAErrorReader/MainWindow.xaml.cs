@@ -23,12 +23,9 @@ namespace CISAErrorReader
     /// </summary>
     public partial class MainWindow : Window
     {
-        List<Models.Error.Prevalidation> prevalidation = new List<Models.Error.Prevalidation>();
-        List<Models.Error.PrevalidationDetails> prevalidationdetails = new List<Models.Error.PrevalidationDetails>();
-        List<Models.Error.Subject> subjects = new List<Models.Error.Subject>();
-        List<Models.Error.SubjectDetails> subjectdetails = new List<Models.Error.SubjectDetails>();
-        List<Models.Error.Contract> contracts = new List<Models.Error.Contract>();
-        List<Models.Error.ContractDetails> contractdetails = new List<Models.Error.ContractDetails>();
+        Models.LocalData Data = new Models.LocalData();
+
+       
 
         Boolean isReady = false;
 
@@ -36,23 +33,26 @@ namespace CISAErrorReader
         public MainWindow()
         {
             InitializeComponent();
+
+            this.DataContext = this.Data;
         }
 
         private void browse_file_Click(object sender, RoutedEventArgs e)
         {
+
             isReady = false;
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "CIC ERROR FILES|*_ERROR.zip";
             if (openFileDialog.ShowDialog() == true)
             {
-                errorFile.IsReadOnly = false;
+                //errorFile.IsReadOnly = false;
                 errorFile.Text = openFileDialog.FileName;
                 errorFile.ScrollToEnd();
-                errorFile.IsReadOnly = true;
+                //errorFile.IsReadOnly = true;
 
                 ErrorFilePath = openFileDialog.FileName;
 
-                ExcelPath = ErrorFilePath.Replace("_ERROR.zip", ".xlsx");
+                ExcelPath = ErrorFilePath.Replace("_ERROR.zip", ".csv");
 
                 if(File.Exists(ExcelPath))
                 {
@@ -61,7 +61,7 @@ namespace CISAErrorReader
                 }
                 else
                 {
-                    ExcelPath = ErrorFilePath.Replace("_ERROR.zip", ".xls");
+                    ExcelPath = ErrorFilePath.Replace("_ERROR.zip", ".csv");
                     if (File.Exists(ExcelPath))
                     {
                         excelFile.Text = ExcelPath;
@@ -69,7 +69,7 @@ namespace CISAErrorReader
                     }
                     else
                     {
-                        MessageBox.Show("Unable to find Excel File!\n\nPlease place the excel file on the same directory/folder of the error zip file.", "ERROR!!!", MessageBoxButton.OK,MessageBoxImage.Error);
+                        MessageBox.Show("Unable to find CSV File!\n\nPlease place the CSV File on the same Directory/Folder of the error zip file.", "ERROR!!!", MessageBoxButton.OK,MessageBoxImage.Error);
                     }
                 }
 
@@ -79,6 +79,26 @@ namespace CISAErrorReader
         private void Generate_Click(object sender, RoutedEventArgs e)
         {
 
+            this.Data.prevalidation = new List<Models.Error.Prevalidation>();
+            this.Data.subjects = new List<Models.Error.Subject>();
+            this.Data.contracts = new List<Models.Error.Contract>();
+
+
+            this.Data.prevalidationdetails = new List<Models.Error.PrevalidationDetails>();
+            this.Data.subjectdetails = new List<Models.Error.SubjectDetails>();
+            this.Data.contractdetails = new List<Models.Error.ContractDetails>();
+
+
+            this.Data.subjectdetailsData = new List<Models.Error.SubjectRows>();
+
+            preTab.IsEnabled = false;
+            preGrid.IsEnabled = false;
+            subTab.IsEnabled = false;
+            subGrid.IsEnabled = false;
+            preTab.IsEnabled = false;
+            subTab.IsEnabled = false;
+
+            tabControl.SelectedIndex = 0;
             using (var zipStream = new FileStream(ErrorFilePath, FileMode.Open))
             {
                 using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Read))
@@ -108,10 +128,11 @@ namespace CISAErrorReader
                                             p.ErrorCount = Convert.ToInt32(LineData[3]);
                                             p.ErrorDescription = LineData[4];
 
-                                            this.prevalidation.Add(p);
+                                            this.Data.prevalidation.Add(p);
                                         }
                                         linenumber++;
                                     }
+                                    prevalidationSummaryData.Items.Refresh();
                                 }
 
                                 if (entry.FullName.Contains("ERROR_PRE"))
@@ -131,7 +152,7 @@ namespace CISAErrorReader
                                             p.ErrorCode = Convert.ToInt32(LineData[7]);
                                             p.RowNumber = Convert.ToInt32(LineData[9]);
 
-                                            this.prevalidationdetails.Add(p);
+                                            this.Data.prevalidationdetails.Add(p);
                                         }
                                         linenumber++;
                                     }
@@ -153,10 +174,12 @@ namespace CISAErrorReader
                                             s.ErrorCount = Convert.ToInt32(LineData[3]);
                                             s.ErrorDescription = LineData[4];
 
-                                            this.subjects.Add(s);
+                                            this.Data.subjects.Add(s);
                                         }
                                         linenumber++;
                                     }
+
+                                    subjectnSummaryData.Items.Refresh();
                                 }
 
 
@@ -177,7 +200,7 @@ namespace CISAErrorReader
                                             s.ErrorType = Convert.ToInt32(LineData[6]);
                                             s.ErrorCode = Convert.ToInt32(LineData[7]);
 
-                                            this.subjectdetails.Add(s);
+                                            this.Data.subjectdetails.Add(s);
                                         }
                                         linenumber++;
                                     }
@@ -195,16 +218,18 @@ namespace CISAErrorReader
                                             String[] LineData = line.Split('|');
                                             Models.Error.Contract c = new Models.Error.Contract();
 
-                                            c.RecordType = LineData[0];
+                                            c.ProviderCode = LineData[0];
                                             c.ErrorType = Convert.ToInt32(LineData[1]);
                                             c.ErrorCode = Convert.ToInt32(LineData[2]);
                                             c.ErrorCount = Convert.ToInt32(LineData[3]);
                                             c.ErrorDescription = LineData[4];
 
-                                            this.contracts.Add(c);
+                                            this.Data.contracts.Add(c);
                                         }
                                         linenumber++;
                                     }
+
+                                    contractDetailData.Items.Refresh();
                                 }
 
 
@@ -214,7 +239,6 @@ namespace CISAErrorReader
                                     int linenumber = 0;
                                     while ((line = reader.ReadLine()) != null)
                                     {
-                                        //Console.WriteLine(line);
                                         if (linenumber > 0)
                                         {
                                             String[] LineData = line.Split('|');
@@ -228,7 +252,7 @@ namespace CISAErrorReader
                                             c.ErrorType = Convert.ToInt32(LineData[6]);
                                             c.ErrorCode = Convert.ToInt32(LineData[7]);
 
-                                            this.contractdetails.Add(c);
+                                            this.Data.contractdetails.Add(c);
                                         }
                                         linenumber++;
                                     }
@@ -240,47 +264,204 @@ namespace CISAErrorReader
                     }
 
 
-                    if (this.prevalidation.Count > 0)
+                    if (this.Data.prevalidation.Count > 0)
                     {
-                        Console.WriteLine("PRE VALIDATION ERRORS START");
-                        foreach (Models.Error.Prevalidation p in this.prevalidation)
-                        {
-                            Console.WriteLine(p.ErrorDescription + " count=" + p.ErrorCount + " rows=" + this.prevalidationdetails.Count);
-                            foreach (Models.Error.PrevalidationDetails d in this.prevalidationdetails)
-                            {
-                                Console.WriteLine(d.RowNumber);
-                            }
-                        }
-                        Console.WriteLine("PRE VALIDATION ERRORS END");
+                        preTab.IsEnabled = true;
+                        preGrid.IsEnabled = true;
 
                     }
                     else
                     {
-
-                        Console.WriteLine("SUBJECT ERRORS START");
-                        foreach (Models.Error.Subject s in this.subjects)
+                        if(this.Data.contracts.Count>0)
                         {
-                            Console.WriteLine(s.ErrorDescription + " count=" + s.ErrorCount + " rows=" + this.subjectdetails.Count);
-                            foreach (Models.Error.SubjectDetails d in this.subjectdetails)
-                            {
-                                Console.WriteLine(d.SubjectCode);
-                            }
+                            conTab.IsEnabled = true;
+                            conGrid.IsEnabled = true;
+                            tabControl.SelectedIndex = 2;
                         }
-                        Console.WriteLine("SUBJECT ERRORS END");
 
-                        Console.WriteLine("CONTRACT ERRORS START");
-                        foreach (Models.Error.Contract s in this.contracts)
+                        if (this.Data.subjects.Count > 0)
                         {
-                            Console.WriteLine(s.ErrorDescription + " count=" + s.ErrorCount + " rows=" + this.contractdetails.Count);
-                            foreach (Models.Error.ContractDetails d in this.contractdetails)
-                            {
-                                Console.WriteLine(d.ContractCode);
-                            }
+                            subTab.IsEnabled = true;
+                            subGrid.IsEnabled = true;
+                            tabControl.SelectedIndex = 1;
                         }
-                        Console.WriteLine("CONTRACT ERRORS END");
                     }
                 }
             }
+
+            //FILE READ AREA
+
+            const Int32 BufferSize = 128;
+            using (var fileStream = File.OpenRead(excelFile.Text))
+            { 
+                using (var streamReader = new StreamReader(fileStream, Encoding.UTF8, true, BufferSize))
+                {
+
+                    if (this.Data.prevalidation.Count > 0)
+                    {
+                        int LineNumber = 0;
+                        String line;
+                        while ((line = streamReader.ReadLine()) != null)
+                        {
+                            LineNumber++;
+                            if(this.Data.prevalidationdetails.FindIndex(o=>o.RowNumber == LineNumber) >= 0)
+                            {
+                                //Models.Error.PrevalidationRows pf = new Models.Error.PrevalidationRows();
+                                this.Data.prevalidationdetails.Find(o => o.RowNumber == LineNumber).ErrorData = line;
+                                //String[] columns = line.Split('|');
+                                //pf.ErrorCode = Convert.ToInt32(columns[7]);
+                                //pf.ErrorType = Convert.ToInt32(columns[6]);
+                                //pf.RowNumber = LineNumber;
+                                //this.Data.prevalidationdetailsData.Add(pf);
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        int LineNumber = 0;
+                        String line;
+                        while ((line = streamReader.ReadLine()) != null)
+                        {
+                            String[] columns = line.Split('|');
+                            if (columns[0] == "ID")
+                            {
+                                int i = this.Data.subjectdetails.FindIndex(o => o.SubjectCode == columns[4]);
+                                if (i >= 0)
+                                {
+                                    this.Data.subjectdetails.Find(o => o.SubjectCode == columns[4]).ErrorData = line;
+                                    this.Data.subjectdetails.Find(o => o.SubjectCode == columns[4]).RowNumber = (LineNumber + 1);
+
+
+                                }
+                            }
+                            if (columns[0] == "CI")
+                            {
+                                int i = this.Data.contractdetails.FindIndex(o => o.ContractCode == columns[6]);
+                                if (i >= 0)
+                                {
+                                    this.Data.contractdetails.Find(o => o.ContractCode == columns[6]).ErrorData = line;
+                                    this.Data.contractdetails.Find(o => o.ContractCode == columns[6]).RowNumber = (LineNumber + 1);
+                                }
+                            }
+                            LineNumber++;
+                        }
+                        // Process line
+                    }
+                }
+
+            }
+        }
+
+
+        private void Prevalidation_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+
+            //MessageBox.Show("test");
+            // Some operations with this row
+            this.Data.prevalidationdetailsData = new List<Models.Error.PrevalidationRows>();
+            Models.Error.Prevalidation contract = (Models.Error.Prevalidation)prevalidationSummaryData.SelectedItem;
+
+            int ErrorCode = contract.ErrorCode;
+            int ErrorType = contract.ErrorType;
+
+            foreach (Models.Error.PrevalidationDetails cd in this.Data.prevalidationdetails.FindAll(o => o.ErrorType == ErrorType && o.ErrorCode == ErrorCode))
+            {
+                Models.Error.PrevalidationRows prevalidationrow = new Models.Error.PrevalidationRows();
+
+                prevalidationrow.Line = cd.RowNumber;
+                prevalidationrow.ErrorType = cd.ErrorType;
+                prevalidationrow.ErrorCode = cd.ErrorCode;
+
+
+                String[] columns = cd.ErrorData.Split('|');
+
+
+                prevalidationrow.RecordType = columns[0];
+                prevalidationrow.BranchCode = columns[2];
+                prevalidationrow.PSubjectRefDate = columns[3];
+                prevalidationrow.PSubjectNumber = columns[4];
+
+                this.Data.prevalidationdetailsData.Add(prevalidationrow);
+
+            }
+
+            List<Models.Error.PrevalidationRows> pr = this.Data.prevalidationdetailsData.OrderBy(o=>o.Line).ToList<Models.Error.PrevalidationRows>();
+            this.Data.prevalidationdetailsData = pr;
+            prevalidationDetailData.Items.Refresh();
+        }
+
+        private void Subjects_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+            // Some operations with this row
+            this.Data.subjectdetailsData = new List<Models.Error.SubjectRows>();
+            Models.Error.Subject subject = (Models.Error.Subject) subjectnSummaryData.SelectedItem;
+
+            int ErrorCode = subject.ErrorCode;
+            int ErrorType = subject.ErrorType;
+
+            foreach (Models.Error.SubjectDetails sd in this.Data.subjectdetails.FindAll(o => o.ErrorType == ErrorType && o.ErrorCode == ErrorCode))
+            {
+                Console.WriteLine(sd.RowNumber);
+                Models.Error.SubjectRows subjectrow = new Models.Error.SubjectRows();
+
+                subjectrow.Line = sd.RowNumber;
+                subjectrow.RecordType = "ID";
+                subjectrow.SubjectReferenceDate = sd.ReferrenceDate;
+
+
+                String[] columns = sd.ErrorData.Split('|');
+
+
+                subjectrow.BranchCode = columns[2];
+                subjectrow.PSubjectNumber = columns[4];
+                subjectrow.FirstName = columns[6];
+                subjectrow.LastName = columns[7];
+                subjectrow.Gender = columns[12];
+                subjectrow.DateofBirth = columns[13];
+                subjectrow.CivilStatus = columns[18];
+
+                this.Data.subjectdetailsData.Add(subjectrow);
+
+            }
+            subjectDetailData.Items.Refresh();
+        }
+
+
+        private void Contracts_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+            // Some operations with this row
+            this.Data.contractdetailsData = new List<Models.Error.ContractRows>();
+            Models.Error.Contract contract = (Models.Error.Contract)contractSummaryData.SelectedItem;
+
+            int ErrorCode = contract.ErrorCode;
+            int ErrorType = contract.ErrorType;
+
+            foreach (Models.Error.ContractDetails cd in this.Data.contractdetails.FindAll(o => o.ErrorType == ErrorType && o.ErrorCode == ErrorCode))
+            {
+                Models.Error.ContractRows contractrow = new Models.Error.ContractRows();
+
+                contractrow.Line = cd.RowNumber;
+                contractrow.RecordType = "CI";
+                contractrow.SubjectReferenceDate = cd.ReferrenceDate;
+
+
+                String[] columns = cd.ErrorData.Split('|');
+
+
+                contractrow.BranchCode = columns[2];
+                contractrow.PSubjectNumber = columns[4];
+                contractrow.Role = columns[5];
+                contractrow.PContractNumber = columns[6];
+                contractrow.ContractPhase = columns[8];
+
+                this.Data.contractdetailsData.Add(contractrow);
+
+            }
+            contractDetailData.Items.Refresh();
         }
     }
 }

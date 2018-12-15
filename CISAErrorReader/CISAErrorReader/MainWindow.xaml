@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CISAErrorReader"
+        xmlns:u="clr-namespace:UpdateControls.XAML;assembly=UpdateControls.XAML"
         mc:Ignorable="d"
         Title="CISA Error Reader" Height="560" Width="1024" WindowStartupLocation="CenterScreen">
     <Grid>
@@ -11,31 +12,91 @@
         <TextBox x:Name="errorFile" Height="23" Margin="75,25,250,0" TextWrapping="NoWrap" TextAlignment="Left" VerticalAlignment="Top" IsReadOnly="True"/>
         <Button x:Name="browse_file" Content="Browse" HorizontalAlignment="Right" Margin="0,25,130,0" VerticalAlignment="Top" Width="101" Click="browse_file_Click" />
         <Button x:Name="Generate" Content="Generate" Margin="0,25,20,0" VerticalAlignment="Top" Width="101" HorizontalAlignment="Right" Click="Generate_Click"/>
-        <Label x:Name="excelFileLabel" Content="Excel File:" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="excelFileLabel" Content="CSV File:" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="excelFile" Height="23" Margin="75,51,250,0" TextWrapping="NoWrap" TextAlignment="Left" VerticalAlignment="Top" IsReadOnly="True" IsEnabled="False"/>
         <TabControl x:Name="tabControl" Margin="0,80,0,0" Width="1016">
-            <TabItem Header="Prevalidation">
-                <Grid Background="#FFE5E5E5">
+            <TabItem x:Name="preTab" Header="Prevalidation" IsEnabled="False">
+                <Grid x:Name="preGrid"  IsEnabled="False" Background="#FFE5E5E5">
                     <Label x:Name="PrevalidationErrorSummaryLabel" Content="Summary:" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
-                    <DataGrid x:Name="prevalidationSummaryData" Margin="16,25,20,0" Width="968" VerticalAlignment="Top" Height="160"/>
+                    <DataGrid x:Name="prevalidationSummaryData" AutoGenerateColumns="False" IsReadOnly="True" Margin="16,25,20,0" Width="968" VerticalAlignment="Top" Height="160" CanUserAddRows="False" ItemsSource="{Binding prevalidation, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridRow">
+                                <EventSetter Event="MouseDoubleClick" Handler="Prevalidation_DoubleClick"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ErrorType}" Width="50" Header="Type"/>
+                            <DataGridTextColumn Binding="{Binding ErrorCode}" Width="50" Header="Code"/>
+                            <DataGridTextColumn Binding="{Binding ErrorCount}" Width="50" Header="Count"/>
+                            <DataGridTextColumn Binding="{Binding ErrorDescription}" Header="Description" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                     <Label x:Name="PrevalidationErrorDetailLabel" Content="Details:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top"/>
-                    <DataGrid x:Name="prevalidationDetailData" Margin="16,215,20,20" Width="968"/>
+                    <DataGrid x:Name="prevalidationDetailData"  CanUserAddRows="False" Margin="16,215,20,20" Width="968"  ItemsSource="{Binding prevalidationdetailsData, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Subject Errors">
-                <Grid Background="#FFE5E5E5">
+            <TabItem x:Name="subTab" Header="Subject Errors"  IsEnabled="False" >
+                <Grid Background="#FFE5E5E5" Name="subGrid"  IsEnabled="False">
                     <Label x:Name="SubjectErrorSummaryLabel" Content="Summary:" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
-                    <DataGrid x:Name="subjectnSummaryData" Margin="16,25,20,0" Width="968" VerticalAlignment="Top" Height="160"/>
-                    <Label x:Name="SubjectErrorDetailLabel" Content="Details:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top"/>
-                    <DataGrid x:Name="subjectDetailData" Margin="16,215,20,20" Width="968"/>
+                    <DataGrid x:Name="subjectnSummaryData" IsReadOnly="True"  CanUserAddRows="False" Margin="16,25,20,0" Width="968" VerticalAlignment="Top" Height="160"  AutoGenerateColumns="False" ItemsSource="{Binding subjects, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridRow">
+                                <EventSetter Event="MouseDoubleClick" Handler="Subjects_DoubleClick"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ErrorType}" Width="50" Header="Type"/>
+                            <DataGridTextColumn Binding="{Binding ErrorCode}" Width="50" Header="Code"/>
+                            <DataGridTextColumn Binding="{Binding ErrorCount}" Width="50" Header="Count"/>
+                            <DataGridTextColumn Binding="{Binding ErrorDescription}" Header="Description" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Label x:Name="SubjectErrorDetailLabel" Content="Details:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top"  />
+                    <DataGrid x:Name="subjectDetailData" IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" Margin="16,215,20,20" Width="968" ItemsSource="{Binding subjectdetailsData, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Line}" Width="50" Header="Line"/>
+                            <DataGridTextColumn Binding="{Binding RecordType}" Width="80" Header="Record Type"/>
+                            <DataGridTextColumn Binding="{Binding BranchCode}" Width="80" Header="Branch Code"/>
+                            <DataGridTextColumn Binding="{Binding SubjectReferenceDate}" Width="135" Header="Subject Reference Date"/>
+                            <DataGridTextColumn Binding="{Binding PSubjectNumber}" Width="150" Header="Providers Subject Number"/>
+                            <DataGridTextColumn Binding="{Binding FirstName}" Header="First Name" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Gender}" Width="80" Header="Gender"/>
+                            <DataGridTextColumn Binding="{Binding DateofBirth}" Width="80" Header="Date of Birth"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
-            <TabItem Header="Contract Errors">
-                <Grid Background="#FFE5E5E5">
+            <TabItem x:Name="conTab" Header="Contract Errors"  IsEnabled="False" >
+                <Grid Background="#FFE5E5E5" Name="conGrid"  IsEnabled="False">
                     <Label x:Name="ContractErrorSummaryLabel" Content="Summary:" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
-                    <DataGrid x:Name="contractSummaryData" Margin="16,25,20,0" Width="968" VerticalAlignment="Top" Height="160"/>
+                    <DataGrid x:Name="contractSummaryData" IsReadOnly="True"  CanUserAddRows="False" Margin="16,25,20,0" Width="968" VerticalAlignment="Top" Height="160" AutoGenerateColumns="False"   ItemsSource="{Binding contracts, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+                        <DataGrid.Resources>
+                            <Style TargetType="DataGridRow">
+                                <EventSetter Event="MouseDoubleClick" Handler="Contracts_DoubleClick"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding ErrorType}" Width="50" Header="Type"/>
+                            <DataGridTextColumn Binding="{Binding ErrorCode}" Width="50" Header="Code"/>
+                            <DataGridTextColumn Binding="{Binding ErrorCount}" Width="50" Header="Count"/>
+                            <DataGridTextColumn Binding="{Binding ErrorDescription}" Header="Description" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                     <Label x:Name="ContractErrorDetailLabel" Content="Details:" HorizontalAlignment="Left" Margin="10,190,0,0" VerticalAlignment="Top"/>
-                    <DataGrid x:Name="contractDetailData" Margin="16,215,20,20" Width="968"/>
+                    <DataGrid x:Name="contractDetailData" IsReadOnly="True"  CanUserAddRows="False" Margin="16,215,20,20" Width="968"   AutoGenerateColumns="False" ItemsSource="{Binding contractdetailsData, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
+
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Line}" Width="50" Header="Line"/>
+                            <DataGridTextColumn Binding="{Binding RecordType}" Width="80" Header="Record Type"/>
+                            <DataGridTextColumn Binding="{Binding BranchCode}" Width="80" Header="Branch Code"/>
+                            <DataGridTextColumn Binding="{Binding SubjectReferenceDate}" Width="135" Header="Subject Reference Date"/>
+                            <DataGridTextColumn Binding="{Binding PSubjectNumber}" Width="150" Header="Providers Subject Number"/>
+                            <DataGridTextColumn Binding="{Binding PContractNumber}" Header="Providers Contract Number" Width="160"/>
+                            <DataGridTextColumn Binding="{Binding Role}" Header="Role" Width="50"/>
+                            <DataGridTextColumn Binding="{Binding ContractPhase}" Header="Contract Phase" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
         </TabControl>

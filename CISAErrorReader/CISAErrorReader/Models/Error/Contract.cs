@@ -8,7 +8,7 @@ namespace CISAErrorReader.Models.Error
 {
     public class Contract
     {
-        public String RecordType { get; set; }
+        public String ProviderCode { get; set; }
         public int ErrorType { get; set; }
         public int ErrorCode { get; set; }
         public int ErrorCount { get; set; }
